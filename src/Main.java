@@ -43,17 +43,19 @@ public class Main {
                     break;
                 case 3:
                     //BFS(vertex X)
-                    System.out.print("Start from vertex: ");
-                    String vertex = sc.nextLine();
-                    System.err.print("Not supported yet. Please call it in main\n");
-                    
-                    break;
+                    System.out.println("");
+                    System.out.print("BFS from the vertex:");
+                    int v4 = Integer.parseInt(sc.nextLine());
+                    graph.BFS(v4);
+                    break;          
                 case 4:
                     //DFS(vertex X)
                     System.out.print("Start from vertex: ");
                     int startVertex = Integer.parseInt(sc.nextLine());
                     System.out.println("Performing DFS traversal starting from vertex " + startVertex + ":");
                     graph.DFS(startVertex);
+                    System.out.print("Press Enter to continue.");
+                    sc.nextLine();
                     break;
                 case 5:
                     //Dijkstra algorithms
@@ -62,11 +64,13 @@ public class Main {
                     System.out.print("To vertex: ");
                     int endV = Integer.parseInt(sc.nextLine());
                     graph.dijkstra(startV, endV);
+                    System.out.print("Press Enter to continue.");
+                    sc.nextLine();
                     break;
                 case 6:
                     //Prim-Janik algorithms
                     System.out.print("Start from vertex: ");
-                    vertex = sc.nextLine();
+                    String vertex = sc.nextLine();
                     System.err.print("Not supported yet. Please call it in main\n");
                     break;
                 case 7:
@@ -78,11 +82,11 @@ public class Main {
                     System.out.print("Start from vertex: ");
                     int start = Integer.parseInt(sc.nextLine());
                     graph.eulerCycle(start);
-                    System.out.println("Press Enter to continue.");
-                    String a = sc.nextLine();
+                    System.out.print("Press Enter to continue.");
+                    sc.nextLine();
                     break;
             }
-        } while (choice > 1 && choice < 9);
+        } while (choice > 0 && choice < 9);
         System.out.println("Good bye!");
     }
 }
