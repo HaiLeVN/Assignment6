@@ -2,17 +2,15 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Stack;
-
-
-
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -83,9 +81,55 @@ public class Graph {
         System.out.println();
         reader.close();
     }
+    // from adjacency matrix to incident matrix and print 
+
+    public void convert1() {
+        incMatrix = new int[V][E];
+        int edgeCount = 0;
+        for (int i = 0; i < V; i++) {
+            for (int j = i + 1; j < V; j++) {
+                if (adjMatrix[i][j] > 0) {
+                    incMatrix[i][edgeCount] = 1;
+                    incMatrix[j][edgeCount] = 1;
+                    edgeCount++;
+                }
+            }
+        }
+        for (int i = 0; i < V; i++) {
+            for(int j = 0; j < V; j ++) {
+              System.out.print(incMatrix[i][j] + " "); 
+            }
+            System.out.println();
+        }
+    }
+
+
+
+    // from adjacency matrix to adjacency list and print
+    public void convert2() {
+        adjList = new ArrayList<List<Integer>>();
+        for (int i = 0; i < V; i++) {
+            List<Integer> neighbors = new ArrayList<Integer>();
+            for (int j = 0; j < V; j++) {
+                if (adjMatrix[i][j] != 0) {
+                    neighbors.add(j);
+                }
+            }
+            adjList.add(neighbors);
+        }
+        for (int i = 0; i < V; i++) {
+            System.out.print(vertex[i] + ": ");
+            for (int neighbor : adjList.get(i)) {
+                System.out.print(vertex[neighbor] + " ");
+            }
+            System.out.println();
+        }
+    }
+
     void visit(int p) {
         System.out.print(vertex[p] + " ");
     }
+
     void BFS(int x) {
         boolean[] visited = new boolean[V];
         Arrays.fill(visited, false);
