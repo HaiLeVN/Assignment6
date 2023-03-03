@@ -1,6 +1,19 @@
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Stack;
+
+
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -19,6 +32,7 @@ public class Graph {
     List<List<Integer>> adjList; // adjacency list
     int[][] adjMatrix; // adjacency matrix
     int[][] incMatrix; // incidence matrix
+    int INF = 99;
 
     // constructor with no arguments
     public Graph() {
@@ -34,6 +48,7 @@ public class Graph {
     public Graph(int V) {
         this.V = V;
         E = 0;
+        vertex = new char[V];
         adjList = new ArrayList<List<Integer>>();
         for (int i = 0; i < V; i++) {
             adjList.add(new ArrayList<Integer>());
@@ -47,6 +62,10 @@ public class Graph {
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         String[] vertices = reader.readLine().split("\\s+");
         V = vertices.length;
+        vertex = new char[V];
+        for (int i = 0; i < V; i++) {
+            vertex[i] = vertices[i].charAt(0);
+        }
         adjList = new ArrayList<List<Integer>>();
         for (int i = 0; i < V; i++) {
             adjList.add(new ArrayList<Integer>());
@@ -63,16 +82,6 @@ public class Graph {
                 }
             }
         }
-        incMatrix = new int[V][E];
-        for (int i = 0, k = 0; i < V; i++) {
-            for (int j = 0; j < V; j++) {
-                if (adjMatrix[i][j] > 0) {
-                    incMatrix[i][k] = adjMatrix[i][j];
-                    incMatrix[j][k] = -adjMatrix[i][j];
-                    k++;
-                }
-            }
-        }
         System.out.println("Automatically loaded Data.txt.");
         reader.close();
     }
@@ -85,7 +94,7 @@ public class Graph {
 
         while (!stack.empty()) {
             int currentVertex = stack.pop();
-            System.out.print(currentVertex + " ");
+            System.out.print(vertex[currentVertex] + " ");
             List<Integer> neighbors = adjList.get(currentVertex);
             for (int neighbor : neighbors) {
                 if (!visited[neighbor]) {
@@ -97,7 +106,7 @@ public class Graph {
         System.out.println();
     }
 
-    public List<Integer> dijkstra(int s, int d) {
+    public void dijkstra(int s, int d) {
         // initialize distances to all vertices to infinity
         int[] dist = new int[V];
         Arrays.fill(dist, Integer.MAX_VALUE);
@@ -139,49 +148,90 @@ public class Graph {
 
         // construct shortest path as list of vertices
         List<Integer> path = new ArrayList<Integer>();
-        for (int v = d; v != -1; v = prev[v]) {
-            path.add(v);
+        int current = d;
+        while (current != -1) {
+            path.add(current);
+            current = prev[current];
         }
         Collections.reverse(path);
 
-        return path;
+        // print path with distance
+        StringBuilder sb = new StringBuilder();
+        sb.append(vertex[path.get(0)]).append("(").append(0).append(")");
+        for (int i = 1; i < path.size(); i++) {
+            int from = path.get(i - 1);
+            int to = path.get(i);
+            int distance = adjMatrix[from][to];
+            sb.append(" -> ");
+            sb.append(vertex[to]).append("(").append(distance).append(")");
+        }
+        System.out.println(sb.toString());
     }
 
-    public List<Integer> eulerCycle(int start) {
-        List<Integer> cycle = new ArrayList<>();
+    public void eulerCycle(int start) {
         // Check if the graph has edges
         if (E == 0) {
-            return cycle;
+            return;
         }
         // Check if the start vertex is valid
         if (start < 0 || start >= V) {
-            throw new IllegalArgumentException("Invalid start vertex");
+            System.err.println("Invalid start vertex");
+            return;
         }
-        // Create a copy of the adjacency list
-        List<List<Integer>> adjListCopy = new ArrayList<>(adjList);
-        // Initialize a stack to keep track of the vertices
-        Deque<Integer> stack = new ArrayDeque<>();
-        // Add the start vertex to the stack
-        stack.push(start);
-        while (!stack.isEmpty()) {
-            int v = stack.peek();
-            // Check if the current vertex has any neighbors
-            if (!adjListCopy.get(v).isEmpty()) {
-                // Push the first neighbor onto the stack
-                int w = adjListCopy.get(v).remove(0);
-                // Remove the edge between v and w
-                adjListCopy.get(w).remove(Integer.valueOf(v));
-                // Push w onto the stack
-                stack.push(w);
-            } else {
-                // The current vertex has no neighbors, so pop it off the stack and add it to the cycle
-                int u = stack.pop();
-                cycle.add(u);
+        // Find the degree of each vertex
+        int[] degree = new int[V];
+        for (int u = 0; u < V; u++) {
+            for (int v : adjList.get(u)) {
+                degree[u]++;
             }
         }
-        // Reverse the cycle to get the correct order of vertices
-        Collections.reverse(cycle);
-        return cycle;
+        // Check if there are two vertices with odd degree
+        int oddCount = 0;
+        int oddVertex = -1;
+        for (int u = 0; u < V; u++) {
+            if (degree[u] % 2 == 1) {
+                oddCount++;
+                oddVertex = u;
+            }
+        }
+        if (oddCount > 2) {
+            System.err.println("Graph is not Eulerian");
+            return;
+        }
+        // If there is one vertex with odd degree, use it as start vertex
+        if (oddCount == 1) {
+            start = oddVertex;
+        }
+        // Create a copy of the adjacency list to remove edges as they are used
+        List<List<Integer>> adjListCopy = new ArrayList<>();
+        for (int u = 0; u < V; u++) {
+            adjListCopy.add(new ArrayList<>(adjList.get(u)));
+        }
+        // Create a stack to keep track of the current path
+        Stack<Integer> stack = new Stack<>();
+        // Create a list to keep track of the Eulerian path
+        List<Integer> path = new ArrayList<>();
+        stack.push(start);
+        while (!stack.empty()) {
+            int u = stack.peek();
+            if (adjListCopy.get(u).size() > 0) {
+                int v = adjListCopy.get(u).remove(0);
+                stack.push(v);
+                adjListCopy.get(v).remove(Integer.valueOf(u));
+            } else {
+                stack.pop();
+                path.add(u);
+            }
+        }
+        Collections.reverse(path);
+        // Print the path with vertex labels
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < path.size(); i++) {
+            sb.append(vertex[path.get(i)]);
+            if (i != path.size() - 1) {
+                sb.append(" -> ");
+            }
+        }
+        System.out.println(sb.toString());
     }
-
 }

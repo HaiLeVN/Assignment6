@@ -60,9 +60,8 @@ public class Main {
                     System.out.print("Start from vertex: ");
                     int startV = Integer.parseInt(sc.nextLine());
                     System.out.print("To vertex: ");
-                    int endY = Integer.parseInt(sc.nextLine());
-                    List<Integer> path = graph.dijkstra(startV, endY);
-                    System.out.println("Shortest Path from "+startV+" to " + endY + ": " + path);
+                    int endV = Integer.parseInt(sc.nextLine());
+                    graph.dijkstra(startV, endV);
                     break;
                 case 6:
                     //Prim-Janik algorithms
@@ -78,8 +77,7 @@ public class Main {
                     //Euler cycle
                     System.out.print("Start from vertex: ");
                     int start = Integer.parseInt(sc.nextLine());
-                    List<Integer> eulerCycle = graph.eulerCycle(start);
-                    System.out.println("Euler cycle: " + eulerCycle);
+                    graph.eulerCycle(start);
                     System.out.println("Press Enter to continue.");
                     String a = sc.nextLine();
                     break;
