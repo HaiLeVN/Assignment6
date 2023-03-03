@@ -1,5 +1,6 @@
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
 
 /*
@@ -14,11 +15,12 @@ import java.util.Scanner;
  */
 public class Main {
     public static void main(String[] args) throws IOException {
-        Graph graph = new Graph();
-        graph.load("Data.txt");
+ 
         int choice;
         Scanner sc = new Scanner(System.in);
         do {
+            Graph graph = new Graph();
+            graph.load("Data.txt");
             System.out.println("1. Convert1() ");
             System.out.println("2. Convert2() ");
             System.out.println("3. BFS(Vertex X) ");
@@ -44,20 +46,23 @@ public class Main {
                     System.out.print("Start from vertex: ");
                     String vertex = sc.nextLine();
                     System.err.print("Not supported yet. Please call it in main\n");
+                    
                     break;
                 case 4:
                     //DFS(vertex X)
                     System.out.print("Start from vertex: ");
-                    vertex = sc.nextLine();
-                    System.err.print("Not supported yet. Please call it in main\n");
+                    int startVertex = Integer.parseInt(sc.nextLine());
+                    System.out.println("Performing DFS traversal starting from vertex " + startVertex + ":");
+                    graph.DFS(startVertex);
                     break;
                 case 5:
                     //Dijkstra algorithms
                     System.out.print("Start from vertex: ");
-                    String startV = sc.nextLine();
+                    int startV = Integer.parseInt(sc.nextLine());
                     System.out.print("To vertex: ");
-                    String endY = sc.nextLine();
-                    System.err.print("Not supported yet. Please call it in main\n");
+                    int endY = Integer.parseInt(sc.nextLine());
+                    List<Integer> path = graph.dijkstra(startV, endY);
+                    System.out.println("Shortest Path from "+startV+" to " + endY + ": " + path);
                     break;
                 case 6:
                     //Prim-Janik algorithms
@@ -72,8 +77,11 @@ public class Main {
                 case 8:
                     //Euler cycle
                     System.out.print("Start from vertex: ");
-                    vertex = sc.nextLine();
-                    System.err.print("Not supported yet. Please call it in main\n");
+                    int start = Integer.parseInt(sc.nextLine());
+                    List<Integer> eulerCycle = graph.eulerCycle(start);
+                    System.out.println("Euler cycle: " + eulerCycle);
+                    System.out.println("Press Enter to continue.");
+                    String a = sc.nextLine();
                     break;
             }
         } while (choice > 1 && choice < 9);
