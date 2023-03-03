@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Stack;
@@ -32,7 +31,6 @@ public class Graph {
     List<List<Integer>> adjList; // adjacency list
     int[][] adjMatrix; // adjacency matrix
     int[][] incMatrix; // incidence matrix
-    int INF = 99;
 
     // constructor with no arguments
     public Graph() {
@@ -82,8 +80,29 @@ public class Graph {
                 }
             }
         }
-        System.out.println("Automatically loaded Data.txt.");
+        System.out.println();
         reader.close();
+    }
+    void visit(int p) {
+        System.out.print(vertex[p] + " ");
+    }
+    void BFS(int x) {
+        boolean[] visited = new boolean[V];
+        Arrays.fill(visited, false);
+        int p = x;
+        MyQueue my = new MyQueue();
+        my.EnQueue(p);
+        while (!my.isEmpty()) {
+            int q = my.DeQueue();
+            visited[q] = true;
+            for (int i = 0; i < V; i++) {
+                if (!visited[i] && adjMatrix[i][q] != 0) {
+                    visited[i] = true;
+                    my.EnQueue(i);
+                }
+            }
+            visit(q);
+        }
     }
 
     public void DFS(int startVertex) {
