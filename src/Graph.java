@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
@@ -55,56 +53,56 @@ public class Graph {
 
     // method to load graph data from file
     public void load(String filePath) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        String[] vertices = reader.readLine().split("\\s+");
-        V = vertices.length;
-        vertex = new char[V];
-        for (int i = 0; i < V; i++) {
-            vertex[i] = vertices[i].charAt(0);
-        }
-        adjList = new ArrayList<List<Integer>>();
-        for (int i = 0; i < V; i++) {
-            adjList.add(new ArrayList<Integer>());
-        }
-        adjMatrix = new int[V][V];
-        for (int i = 0; i < V; i++) {
-            String[] edges = reader.readLine().split("\\s+");
-            for (int j = 0; j < V; j++) {
-                int weight = Integer.parseInt(edges[j]);
-                if (weight > 0) {
-                    E++;
-                    adjList.get(i).add(j);
-                    adjMatrix[i][j] = weight;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String[] vertices = reader.readLine().split("\\s+");
+            V = vertices.length; //kiem tra so luong dinh
+            vertex = new char[V];
+            for (int i = 0; i < V; i++) {
+                vertex[i] = vertices[i].charAt(0); //lay label vertex trong String da doc trong file
+            }
+            adjList = new ArrayList<List<Integer>>();
+            for (int i = 0; i < V; i++) {
+                adjList.add(new ArrayList<Integer>());
+            }
+            adjMatrix = new int[V][V];
+            for (int i = 0; i < V; i++) {
+                String[] edges = reader.readLine().split("\\s+");
+                for (int j = 0; j < V; j++) {
+                    int weight = Integer.parseInt(edges[j]);
+                    if (weight > 0) {
+                        E++;
+                        adjList.get(i).add(j);
+                        adjMatrix[i][j] = weight;
+                    }
                 }
             }
+            System.out.println();
+        } catch(Exception e) {
+            System.out.println("Can't find any files named "+filePath);
         }
-        System.out.println();
-        reader.close();
     }
     // from adjacency matrix to incident matrix and print 
-
     public void convert1() {
         incMatrix = new int[V][E];
-        int edgeCount = 0;
-        for (int i = 0; i < V; i++) {
-            for (int j = i + 1; j < V; j++) {
-                if (adjMatrix[i][j] > 0) {
-                    incMatrix[i][edgeCount] = 1;
-                    incMatrix[j][edgeCount] = 1;
-                    edgeCount++;
-                }
+        for(int i = 0; i < V; i++) {
+            for(int j = 0 ; j < V; j++) {
+                if(adjMatrix[i][j] > 0) {
+                    incMatrix[i][j] = 1;
+                }   
             }
         }
+        for(int i = 0; i < V; i++) {
+            System.out.print("  " + vertex[i]);
+        }
+        System.out.println();
         for (int i = 0; i < V; i++) {
+            System.out.print(vertex[i]);
             for(int j = 0; j < V; j ++) {
-              System.out.print(incMatrix[i][j] + " "); 
+              System.out.print(" "+ incMatrix[i][j] + " "); 
             }
             System.out.println();
         }
     }
-
-
-
     // from adjacency matrix to adjacency list and print
     public void convert2() {
         adjList = new ArrayList<List<Integer>>();
@@ -147,6 +145,7 @@ public class Graph {
             }
             visit(q);
         }
+        System.out.println();
     }
 
     public void DFS(int startVertex) {
@@ -155,6 +154,7 @@ public class Graph {
         visited[startVertex] = true;
         stack.push(startVertex);
 
+        System.out.println("Performing DFS traversal starting from vertex " + vertex[startVertex] + ":");
         while (!stack.empty()) {
             int currentVertex = stack.pop();
             System.out.print(vertex[currentVertex] + " ");
@@ -170,8 +170,13 @@ public class Graph {
     }
 
     public void dijkstra(int s, int d) {
-        // initialize distances to all vertices to infinity
+        if(s > V || s < 0 || d < 0 || d > V) {
+            System.out.println("Cannot found your vertex in this Graph");
+            return;
+        }
+        List<Integer> path = new ArrayList<Integer>();
         int[] dist = new int[V];
+        boolean[] visited = new boolean[V];
         Arrays.fill(dist, Integer.MAX_VALUE);
         dist[s] = 0;
 
@@ -182,9 +187,6 @@ public class Graph {
             }
         });
         pq.offer(s);
-
-        // initialize array to track visited vertices
-        boolean[] visited = new boolean[V];
 
         // initialize array to track shortest path
         int[] prev = new int[V];
@@ -210,7 +212,6 @@ public class Graph {
         }
 
         // construct shortest path as list of vertices
-        List<Integer> path = new ArrayList<Integer>();
         int current = d;
         while (current != -1) {
             path.add(current);
@@ -218,6 +219,8 @@ public class Graph {
         }
         Collections.reverse(path);
 
+        //print total distance from path s to d
+        System.out.println("Shortest path from " + vertex[s] + " to " + vertex[d] + " is " + dist[d]);
         // print path with distance
         StringBuilder sb = new StringBuilder();
         sb.append(vertex[path.get(0)]).append("(").append(0).append(")");
@@ -296,5 +299,99 @@ public class Graph {
             }
         }
         System.out.println(sb.toString());
+    }
+
+    public void MST1(int startVertex) {
+        int[] dist = new int[V]; // array to store distance from start vertex to each vertex
+        int[] parent = new int[V]; // array to store parent of each vertex in the MST
+        boolean[] visited = new boolean[V]; // array to mark visited vertices
+        PriorityQueue<Integer> pq = new PriorityQueue<Integer>(V, new Comparator<Integer>() {
+            public int compare(Integer i, Integer j) {
+                return Integer.compare(dist[i], dist[j]);
+            }
+        }); // priority queue to store vertices based on their distance from startVertex
+
+        // initialize dist and parent arrays
+        for (int i = 0; i < V; i++) {
+            dist[i] = Integer.MAX_VALUE;
+            parent[i] = -1;
+        }
+        dist[startVertex] = 0; // set distance to start vertex to 0
+        pq.offer(startVertex); // add start vertex to priority queue
+
+        // loop until priority queue is empty
+        while (!pq.isEmpty()) {
+            int u = pq.poll(); // get vertex with smallest distance
+            visited[u] = true; // mark vertex as visited
+
+            // update distance and parent of each adjacent vertex if necessary
+            for (int v : adjList.get(u)) {
+                if (!visited[v] && adjMatrix[u][v] < dist[v]) {
+                    dist[v] = adjMatrix[u][v];
+                    parent[v] = u;
+                    pq.offer(v);
+                }
+            }
+        }
+
+        // print MST
+        System.out.println("Minimum Spanning Tree:");
+        System.out.println("Edges | Weight" );
+        for (int i = 0; i < V; i++) {
+            if (i != startVertex) {
+                System.out.println(vertex[parent[i]] + " - " + vertex[i] + " | " + adjMatrix[parent[i]][i]);
+            }
+        }
+    }
+    public void MST2() {
+        // create a list of all edges
+        int mst_weight = 0;
+        List<int[]> edges = new ArrayList<int[]>();
+        for (int i = 0; i < V; i++) {
+            for (int j = i + 1; j < V; j++) {
+                if (adjMatrix[i][j] > 0) {
+                    edges.add(new int[]{i, j, adjMatrix[i][j]});
+                }
+            }
+        }
+
+        // sort the edges by weight
+        Collections.sort(edges, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[2] - o2[2];
+            }
+        });
+
+        // create a union-find data structure
+        int[] parent = new int[V];
+        for (int i = 0; i < V; i++) {
+            parent[i] = i;
+        }
+
+        // iterate over the sorted edges
+        for (int i = 0; i < edges.size(); i++) {
+            int[] edge = edges.get(i);
+            int u = edge[0];
+            int v = edge[1];
+            int w = edge[2];
+            int parentU = find(parent, u);
+            int parentV = find(parent, v);
+
+            if (parentU != parentV) {
+                System.out.println(vertex[u] + " - " + vertex[v] + " : " + w);
+                mst_weight += w;
+                parent[parentU] = parentV;
+            }
+        }
+        System.out.println("Weight of MST is: "+mst_weight);
+    }
+
+    // find operation in union-find data structure
+    int find(int[] parent, int i) {
+        if (parent[i] == i) {
+            return i;
+        }
+        return find(parent, parent[i]);
     }
 }
